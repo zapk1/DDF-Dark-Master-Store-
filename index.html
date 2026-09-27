@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark Master Store — Pay Delivery Distance Fee</title>
+<link rel="icon" href__="https://i.postimg.cc/gJhjVfvM/Logo-for-Dark-Master-Store.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111;}
+  .dms-box{background:#fff;border:1px solid #facc15;border-radius:14px;}
+  .dms-btn{background:#fff;color:#111;border:1px solid #facc15;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+  .dms-btn:hover{background:#fefce8;}
+  .dms-btn-primary{background:#facc15;color:#111;border:1px solid #facc15;}
+  .dms-btn-primary:hover{background:#f59e0b;}
+  @keyframes dmsDot{0%{transform:translate(-50%,-50%) scale(.3);opacity:.2}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1}100%{transform:translate(-50%,-50%) scale(.3);opacity:.2}}
+  .dms-ring{position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:#facc15;animation:dmsDot 1.6s ease-in-out infinite;}
+  .dms-ring:nth-child(2){animation-delay:.3s;background:#111;}
+  .dms-ring:nth-child(3){animation-delay:.6s;background:#facc15;}
+  .dms-ring:nth-child(4){animation-delay:.9s;background:#111;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px;}
+  .modal-overlay.active{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- HEADER / LOGO + NAME (tap 4x = admin) -->
+<header style="text-align:center;padding:22px 16px 10px;cursor:pointer;" onclick="handleHeaderClick()">
+    <img src="https://i.postimg.cc/gJhjVfvM/Logo-for-Dark-Master-Store.png" alt="Dark Master Store" style="display:block;margin:0 auto;width:64px;height:64px;border-radius:16px;object-fit:cover;box-shadow:0 6px 18px rgba(0,0,0,.12);"/>
+  <h1 style="font-size:22px;font-weight:900;margin-top:8px;">DARK MASTER STORE</h1>
+  <p style="font-size:12px;color:#6b7280;">South African Online Marketplace</p>
+</header>
+
+<!-- MAIN PAY BOX -->
+<main style="max-width:520px;margin:0 auto;padding:8px 16px 60px;">
+  <div class="dms-box" style="padding:22px;text-align:center;">
+    <h2 style="font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:8px;justify-content:center;">
+      <i data-lucide="truck" style="width:22px;height:22px;color:#facc15;"></i> Pay for Delivery Distance Fee
+    </h2>
+
+    <!-- TRUCK → DASHES → DROP-OFF -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:18px 0 6px;flex-wrap:wrap;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <i data-lucide="truck" style="width:26px;height:26px;color:#111;"></i>
+        <span id="pickupLabel" style="font-size:11px;font-weight:700;max-width:140px;text-align:center;">Pickup point</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:2px;color:#facc15;">
+        <i data-lucide="minus" style="width:14px;height:14px;"></i>
+        <i data-lucide="minus" style="width:14px;height:14px;"></i>
+        <i data-lucide="minus" style="width:14px;height:14px;"></i>
+        <i data-lucide="chevron-right" style="width:14px;height:14px;"></i>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <i data-lucide="map-pin" style="width:26px;height:26px;color:#111;"></i>
+        <span id="dropoffLabel" style="font-size:11px;font-weight:700;max-width:140px;text-align:center;">Delivery point</span>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#374151;font-weight:600;margin-top:4px;">Truck drop-off · You pay R1–5 per KM distance</p>
+
+    <!-- DUE BALANCE -->
+    <div style="margin-top:18px;background:#fff;border:1px solid #facc15;border-radius:12px;padding:14px;">
+      <div style="font-size:11px;color:#6b7280;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Pay Due</div>
+      <div id="dueDisplay" style="font-size:26px;font-weight:900;color:#111;margin-top:4px;">R0.00</div>
+      <div id="kmDisplay" style="font-size:12px;color:#6b7280;margin-top:2px;"></div>
+    </div>
+
+    <!-- CODE INPUT -->
+    <input id="codeInput" type="text" placeholder="Paste your Dark Master Store code" style="width:100%;margin-top:14px;padding:13px 14px;border:1px solid #facc15;border-radius:12px;font-size:14px;outline:none;text-align:center;font-weight:700;letter-spacing:1px;" onfocus="this.style.borderColor='#111'" onblur="this.style.borderColor='#facc15'"/>
+    <button class="dms-btn-primary dms-btn" style="width:100%;margin-top:10px;justify-content:center;padding:13px;" onclick="lookupCode()">
+      <i data-lucide="search" style="width:16px;height:16px;"></i> Show My Delivery Info
+    </button>
+
+    <!-- INFO LIST -->
+    <div id="infoList" style="display:none;margin-top:16px;text-align:left;"></div>
+
+    <!-- PAY BUTTON -->
+    <button id="payBtn" class="dms-btn-primary dms-btn" style="display:none;width:100%;margin-top:14px;justify-content:center;padding:14px;font-size:15px;" onclick="payNow()">
+      <i data-lucide="credit-card" style="width:18px;height:18px;"></i> Pay Due Balance
+    </button>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:#9ca3af;margin-top:18px;">You receive your code by email from darkmasterstore.za@beelzeapps.co.za</p>
+</main>
+
+<!-- PASTE-CODE WELCOME POPUP -->
+<div id="welcomePopup" class="modal-overlay active">
+    <div class="dms-box" style="max-width:380px;width:100%;padding:28px 22px;text-align:center;position:relative;">
+    <button onclick="closeWelcome()" style="position:absolute;top:10px;right:10px;background:#f3f4f6;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:6;">
+      <i data-lucide="x" style="width:18px;height:18px;color:#111;"></i>
+    </button>
+    <div style="position:relative;width:90px;height:90px;margin:0 auto 14px;">
+
+      <div class="dms-ring"></div><div class="dms-ring"></div><div class="dms-ring"></div><div class="dms-ring"></div>
+      <img src="https://i.postimg.cc/gJhjVfvM/Logo-for-Dark-Master-Store.png" alt="Dark Master Store" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:12px;object-fit:cover;z-index:5;"/>
+    </div>
+    <h2 style="font-size:18px;font-weight:900;">Paste your Dark Master Store code</h2>
+    <p style="font-size:13px;color:#374151;margin:8px 0 16px;line-height:1.5;">Paste your Dark Master Store store code you received from <strong>darkmasterstore.za@beelzeapps.co.za</strong> Email to Pay your Delivery Distance Fee.</p>
+    <input id="welcomeCode" type="text" placeholder="Dark-Master-Store-Pay-XXXX" style="width:100%;padding:13px;border:1px solid #facc15;border-radius:12px;text-align:center;font-weight:700;letter-spacing:1px;outline:none;"/>
+    <button class="dms-btn-primary dms-btn" style="width:100%;margin-top:12px;justify-content:center;padding:13px;" onclick="useWelcomeCode()">
+      <i data-lucide="arrow-right" style="width:16px;height:16px;"></i> Continue
+    </button>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="adminLogin" class="modal-overlay">
+  <div class="dms-box" style="max-width:360px;width:100%;padding:28px 22px;text-align:center;">
+    <div style="width:64px;height:64px;background:#fff;border:1px solid #facc15;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+      <i data-lucide="lock" style="width:30px;height:30px;color:#111;"></i>
+    </div>
+    <h2 style="font-size:18px;font-weight:900;">Admin Access</h2>
+    <p style="font-size:12px;color:#6b7280;margin:6px 0 16px;">Dark Master Store · Delivery Vault</p>
+    <input id="adminPass" type="password" placeholder="Enter password" style="width:100%;padding:13px;border:1px solid #facc15;border-radius:12px;text-align:center;letter-spacing:2px;outline:none;" onkeypress="if(event.key==='Enter')attemptAdmin()"/>
+    <p id="adminErr" style="display:none;color:#ef4444;font-size:12px;margin-top:8px;"></p>
+    <button class="dms-btn-primary dms-btn" style="width:100%;margin-top:12px;justify-content:center;padding:13px;" onclick="attemptAdmin()">
+      <i data-lucide="unlock" style="width:16px;height:16px;"></i> Unlock
+    </button>
+    <button class="dms-btn" style="margin-top:10px;" onclick="closeAdmin()">Cancel</button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" style="display:none;max-width:900px;margin:0 auto;padding:0 16px 80px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0 18px;">
+    <h2 style="font-size:18px;font-weight:900;display:inline-flex;align-items:center;gap:8px;"><i data-lucide="clipboard-list" style="width:22px;height:22px;color:#facc15;"></i> Orders</h2>
+    <button class="dms-btn" onclick="refreshOrders()"><i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh</button>
+  </div>
+  <div id="ordersList" style="display:flex;flex-direction:column;gap:14px;"></div>
+</div>
+
+<!-- GENERATE-CODE POPUP -->
+<div id="genPopup" class="modal-overlay">
+  <div class="dms-box" style="max-width:440px;width:100%;padding:24px 22px;position:relative;">
+    <button onclick="closeGen()" style="position:absolute;top:10px;right:10px;background:#f3f4f6;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <h3 style="font-size:16px;font-weight:900;display:inline-flex;align-items:center;gap:8px;"><i data-lucide="ticket" style="width:18px;height:18px;color:#facc15;"></i> Generate Delivery Code</h3>
+    <div id="genOrderInfo" style="font-size:12px;color:#374151;background:#f9fafb;border-radius:10px;padding:10px;margin-top:12px;"></div>
+
+    <label style="font-size:12px;font-weight:700;display:block;margin-top:14px;">Warehouse (Pickup) — South Africa</label>
+    <input id="genPickup" type="text" placeholder="e.g. Dark Master Warehouse, Johannesburg" style="width:100%;margin-top:6px;padding:11px;border:1px solid #facc15;border-radius:10px;outline:none;"/>
+
+    <label style="font-size:12px;font-weight:700;display:block;margin-top:12px;">Final Delivery Destination</label>
+    <input id="genDropoff" type="text" placeholder="e.g. 12 Main St, Cape Town" style="width:100%;margin-top:6px;padding:11px;border:1px solid #facc15;border-radius:10px;outline:none;"/>
+
+    <button class="dms-btn-primary dms-btn" style="width:100%;margin-top:14px;justify-content:center;padding:12px;" onclick="calcDistance()">
+      <i data-lucide="route" style="width:16px;height:16px;"></i> Calculate Distance (KM)
+    </button>
+    <div id="distResult" style="display:none;margin-top:12px;font-size:13px;background:#fefce8;border:1px solid #facc15;border-radius:10px;padding:10px;"></div>
+
+    <label style="font-size:12px;font-weight:700;display:block;margin-top:14px;">Due Amount (ZAR)</label>
+    <input id="genPrice" type="number" step="0.01" placeholder="R amount to charge" style="width:100%;margin-top:6px;padding:11px;border:1px solid #facc15;border-radius:10px;outline:none;"/>
+
+    <button class="dms-btn-primary dms-btn" style="width:100%;margin-top:14px;justify-content:center;padding:13px;" onclick="finalizeCode()">
+      <i data-lucide="key" style="width:16px;height:16px;"></i> Generate Code & Save
+    </button>
+    <div id="genResult" style="display:none;margin-top:14px;text-align:center;"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, query, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC1ucCwM7ebqN-gWHT2NmkqYdK3KZBWv5o",
+  authDomain: "dark-master-store.firebaseapp.com",
+  projectId: "dark-master-store",
+  storageBucket: "dark-master-store.firebasestorage.app",
+  messagingSenderId: "245130963951",
+  appId: "1:245130963951:web:50cdae51f5c59fa8ad641a",
+  measurementId: "G-SZ9JXD2QCB"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const PAYFAST_WORKER_URL = 'https://payfastpayment.white-mouse-5467.workers.dev';
+const ADMIN_PASS = 'VNAXXTTM';
+
+// ---- SHA-256 hash ----
+async function sha256(t){const b=new TextEncoder().encode(t);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+
+// ---- Header 4-tap → admin ----
+let headerClicks=0,headerTimer=null;
+window.handleHeaderClick=function(){
+  headerClicks++;
+  if(headerTimer)clearTimeout(headerTimer);
+  if(headerClicks>=4){headerClicks=0;document.getElementById('adminLogin').classList.add('active');}
+  else headerTimer=setTimeout(()=>headerClicks=0,1500);
+};
+window.closeAdmin=function(){document.getElementById('adminLogin').classList.remove('active');document.getElementById('adminPass').value='';document.getElementById('adminErr').style.display='none';};
+window.attemptAdmin=async function(){
+  const v=document.getElementById('adminPass').value;
+  const h=await sha256(v);
+  const expected=await sha256(ADMIN_PASS);
+  if(h===expected){closeAdmin();document.getElementById('welcomePopup').classList.remove('active');document.getElementById('adminPanel').style.display='block';loadOrders();}
+  else{document.getElementById('adminErr').textContent='Wrong password.';document.getElementById('adminErr').style.display='block';}
+};
+
+// ---- Load orders from Firestore ----
+let allOrders=[];
+async function loadOrders(){
+  const snap=await getDocs(collection(db,'orders'));
+  allOrders=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderOrders();
+  if(window.lucide)lucide.createIcons();
+}
+window.refreshOrders=loadOrders;
+
+function renderOrders(){
+  const list=document.getElementById('ordersList');
+  if(!allOrders.length){list.innerHTML='<p style="text-align:center;color:#6b7280;padding:30px;">No orders found.</p>';return;}
+  list.innerHTML=allOrders.map(o=>{
+    const items=(o.items||[]).map(i=>`<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">${i.image?`<img src="${i.image}" style="width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid #facc15;"/>`:''}<div><div style="font-size:12px;font-weight:700;">${i.name||''}</div><div style="font-size:11px;color:#6b7280;">×${i.quantity||1} · R${((i.price||0)*(i.quantity||1)).toFixed(2)}</div></div></div>`).join('');
+    const addr=[o.address,o.city,o.suburb,o.province].filter(Boolean).join(', ');
+    return `<div class="dms-box" style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div style="font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px;"><i data-lucide="user" style="width:14px;height:14px;color:#facc15;"></i>${o.fullName||'Customer'}</div>
+          <div style="font-size:12px;color:#374151;margin-top:3px;display:flex;align-items:center;gap:6px;"><i data-lucide="mail" style="width:12px;height:12px;color:#facc15;"></i>${o.userEmail||o.email||''}</div>
+          <div style="font-size:12px;color:#374151;margin-top:3px;display:flex;align-items:center;gap:6px;"><i data-lucide="map-pin" style="width:12px;height:12px;color:#facc15;"></i>${addr||'—'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:#6b7280;">Total</div>
+          <div style="font-size:16px;font-weight:900;">R${(o.total||0).toFixed(2)}</div>
+          <div style="font-size:11px;color:#6b7280;">${o.createdAt?new Date(o.createdAt).toLocaleDateString():''}</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;border-top:1px dashed #facc15;padding-top:10px;">${items}</div>
+      <button class="dms-btn" style="margin-top:10px;" onclick="openGen('${o.id}')"><i data-lucide="ticket" style="width:14px;height:14px;color:#facc15;"></i> Generate Delivery Code</button>
+    </div>`;
+  }).join('');
+  if(window.lucide)lucide.createIcons();
+}
+
+// ---- Generate code flow ----
+let currentOrder=null,currentCode=null,currentKm=null;
+window.openGen=function(orderId){
+  currentOrder=allOrders.find(o=>o.id===orderId);currentCode=null;currentKm=null;
+  const o=currentOrder||{};
+  const addr=[o.address,o.city,o.suburb,o.province].filter(Boolean).join(', ');
+  document.getElementById('genOrderInfo').innerHTML=`<strong>${o.fullName||''}</strong> · ${o.userEmail||''}<br/>Deliver to: ${addr||'—'}`;
+  document.getElementById('genPickup').value='';
+  document.getElementById('genDropoff').value=addr||'';
+  document.getElementById('distResult').style.display='none';
+  document.getElementById('genResult').style.display='none';
+  document.getElementById('genPrice').value='';
+  document.getElementById('genPopup').classList.add('active');
+};
+window.closeGen=function(){document.getElementById('genPopup').classList.remove('active');};
+
+// Nominatim geocode + haversine (free, no key) — "Google maps info" calculation
+async function geocode(place){
+  const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(place+', South Africa'),{headers:{'Accept':'application/json'}});
+  const d=await r.json();
+  if(!d.length)throw new Error('Could not find: '+place);
+  return {lat:parseFloat(d[0].lat),lon:parseFloat(d[0].lon),name:d[0].display_name};
+}
+function haversine(a,b){
+  const R=6371,toRad=x=>x*Math.PI/180;
+  const dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon);
+  const s=Math.sin(dLat/2)**2+Math.cos(toRad(a.lat))*Math.cos(toRad(b.lat))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));
+}
+window.calcDistance=async function(){
+  const p=document.getElementById('genPickup').value.trim();
+  const d=document.getElementById('genDropoff').value.trim();
+  if(!p||!d){alert('Enter both pickup and drop-off.');return;}
+  const box=document.getElementById('distResult');
+  box.style.display='block';box.textContent='Calculating distance…';
+  try{
+    const a=await geocode(p),b=await geocode(d);
+    currentKm=haversine(a,b);
+    box.innerHTML=`<strong>Distance:</strong> ${currentKm.toFixed(1)} km<br/><span style="font-size:11px;color:#6b7280;">You pay R1–5 per KM on Total of ${currentKm.toFixed(1)} km</span>`;
+  }catch(e){box.textContent='Error: '+e.message;}
+};
+
+window.finalizeCode=async function(){
+  if(currentKm==null){alert('Calculate the distance first.');return;}
+  const price=parseFloat(document.getElementById('genPrice').value);
+  if(!price||price<=0){alert('Enter the Due amount in ZAR.');return;}
+  if(!currentCode)currentCode='Dark-Master-Store-Pay-'+Math.random().toString(36).slice(2,10);
+  const o=currentOrder||{};
+  const data={
+    code:currentCode,
+    orderId:o.id||null,
+    customerName:o.fullName||'',
+    customerEmail:o.userEmail||o.email||'',
+    pickup:document.getElementById('genPickup').value.trim(),
+    dropoff:document.getElementById('genDropoff').value.trim(),
+    distanceKm:currentKm,
+    priceZAR:price,
+    paid:false,
+    createdAt:new Date().toISOString()
+  };
+  try{
+    await addDoc(collection(db,'deliveryFees'),data);
+    document.getElementById('genResult').style.display='block';
+    document.getElementById('genResult').innerHTML=`<div style="background:#fefce8;border:1px solid #facc15;border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#92400e;">DELIVERY CODE GENERATED</div>
+      <div style="font-size:16px;font-weight:900;margin:6px 0;letter-spacing:1px;">${currentCode}</div>
+<button class="dms-btn" onclick="navigator.clipboard.writeText('${currentCode}');showToast('Code copied!')"><i data-lucide="copy" style="width:14px;height:14px;color:#facc15;"></i> Copy Code</button>
+      <p style="font-size:11px;color:#6b7280;margin-top:8px;">Email this code to ${o.userEmail||'the customer'}.</p></div>`;
+    window.showToast=function(msg){
+  let t=document.getElementById('dmsToast');
+  if(!t){t=document.createElement('div');t.id='dmsToast';t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-20px);background:#fff;color:#111;border:1px solid #facc15;border-radius:14px;padding:12px 22px;font-size:14px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:99999;display:flex;align-items:center;gap:8px;opacity:0;transition:opacity .25s ease,transform .25s ease;';document.body.appendChild(t);}
+  t.innerHTML='<i data-lucide="check-circle" style="width:18px;height:18px;color:#16a34a;"></i>'+msg;
+  if(window.lucide)lucide.createIcons();
+  t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(window._dmsToastT);window._dmsToastT=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(-20px)';},2000);
+};
+if(window.lucide)lucide.createIcons();
+  }catch(e){alert('Save failed: '+e.message);}
+};
+
+// ---- Customer: use welcome code ----
+window.closeWelcome=function(){document.getElementById('welcomePopup').classList.remove('active');};
+window.useWelcomeCode=function(){
+  const c=document.getElementById('welcomeCode').value.trim();
+  if(!c){alert('Paste your code first.');return;}
+  document.getElementById('codeInput').value=c;
+  document.getElementById('welcomePopup').classList.remove('active');
+  lookupCode();
+};
+
+// ---- Lookup code → fetch Firestore ----
+window.lookupCode=async function(){
+  const c=document.getElementById('codeInput').value.trim();
+  if(!c){alert('Paste your code.');return;}
+  const info=document.getElementById('infoList');
+  info.style.display='block';info.innerHTML='<p style="text-align:center;color:#6b7280;">Looking up your code…</p>';
+  document.getElementById('payBtn').style.display='none';
+  try{
+    const q=query(collection(db,'deliveryFees'),where('code','==',c));
+    const snap=await getDocs(q);
+    if(snap.empty){info.innerHTML='<p style="color:#ef4444;text-align:center;">Code not found. Check your email and try again.</p>';return;}
+    const rec=snap.docs[0].data();
+    window._feeRec={id:snap.docs[0].id,...rec};
+    document.getElementById('pickupLabel').textContent=rec.pickup||'Pickup point';
+    document.getElementById('dropoffLabel').textContent=rec.dropoff||'Delivery point';
+    document.getElementById('dueDisplay').textContent='R'+(rec.priceZAR||0).toFixed(2);
+    document.getElementById('kmDisplay').textContent=rec.distanceKm?`Distance: ${rec.distanceKm.toFixed(1)} km · R1–5 per KM`:'';
+    info.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+      <div style="display:flex;gap:8px;align-items:center;"><i data-lucide="truck" style="width:16px;height:16px;color:#facc15;"></i><strong>Pickup:</strong> ${rec.pickup||'—'}</div>
+      <div style="display:flex;gap:8px;align-items:center;"><i data-lucide="map-pin" style="width:16px;height:16px;color:#facc15;"></i><strong>Drop-off:</strong> ${rec.dropoff||'—'}</div>
+      <div style="display:flex;gap:8px;align-items:center;"><i data-lucide="route" style="width:16px;height:16px;color:#facc15;"></i><strong>Distance:</strong> ${rec.distanceKm?rec.distanceKm.toFixed(1)+' km':'—'}</div>
+      <div style="display:flex;gap:8px;align-items:center;"><i data-lucide="wallet" style="width:16px;height:16px;color:#facc15;"></i><strong>Due Balance:</strong> R${(rec.priceZAR||0).toFixed(2)}</div>
+    </div>`;
+    document.getElementById('payBtn').style.display='inline-flex';
+    if(window.lucide)lucide.createIcons();
+  }catch(e){info.innerHTML='<p style="color:#ef4444;text-align:center;">Error: '+e.message+'</p>';}
+};
+
+// ---- Pay via PayFast worker ----
+window.payNow=async function(){
+  const rec=window._feeRec;
+  if(!rec){alert('Look up your code first.');return;}
+  const amt=rec.priceZAR||0;
+  if(amt<=0){alert('Nothing to pay.');return;}
+  const btn=document.getElementById('payBtn');
+  btn.disabled=true;btn.innerHTML='Redirecting…';
+  try{
+    const res=await fetch(PAYFAST_WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt.toFixed(2),itemName:'Dark Master Store Delivery Fee '+rec.code,itemDesc:'Delivery distance fee — '+(rec.distanceKm?rec.distanceKm.toFixed(1)+' km':''),orderRef:rec.code,email:rec.customerEmail||'',nameFirst:(rec.customerName||'').split(' ')[0]})});
+    const data=await res.json();
+    if(!data.url||!data.fields)throw new Error('PayFast could not start.');
+    const pf=document.createElement('form');pf.method='POST';pf.action=data.url;
+    Object.entries(data.fields).forEach(([k,v])=>{const i=document.createElement('input');i.type='hidden';i.name=k;i.value=v;pf.appendChild(i);});
+    document.body.appendChild(pf);pf.submit();
+  }catch(e){alert('Pay error: '+e.message);btn.disabled=false;btn.innerHTML='<i data-lucide="credit-card" style="width:18px;height:18px;"></i> Pay Due Balance';if(window.lucide)lucide.createIcons();}
+};
+
+if(window.lucide)lucide.createIcons();
+</script>
+</body>
+</html>
